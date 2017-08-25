@@ -1,0 +1,10 @@
+{
+    "user": "stepan",
+    "access": {
+        "foris-controller-diagnostics": {
+            "methods": [ "list_diagnostics", "list_modules", "remove_diagnostic", "prepare_diagnostic"]
+        }
+    },
+    "publish": [ "foris-controller-diagnostics" ],
+    "subscribe": [ "foris-controller-diagnostics" ]
+}
