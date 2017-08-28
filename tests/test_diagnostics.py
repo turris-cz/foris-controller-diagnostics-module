@@ -61,6 +61,15 @@ def test_diagnostics_remove_diagnostic(infrastructure, ubusd_test, clear_diagnos
         "kind": "request",
         "data": {"diag_id": diag_id},
     })
+    assert res["data"]["errors"] == ["Incorrect input."]
+
+    diag_id = "9999-99-99_ffffffff"
+    res = infrastructure.process_message({
+        "module": "diagnostics",
+        "action": "remove_diagnostic",
+        "kind": "request",
+        "data": {"diag_id": diag_id},
+    })
     assert res["data"] == {"result": False, "diag_id": diag_id}
 
 

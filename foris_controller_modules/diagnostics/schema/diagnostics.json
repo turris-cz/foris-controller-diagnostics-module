@@ -1,4 +1,10 @@
 {
+    "definitions": {
+        "diag_id_type": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}_[a-z0-9]{8}$"
+        }
+    },
     "oneOf": [
         {
             "description": "List diagnostic modules",
@@ -55,7 +61,7 @@
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "diag_id": {"type": "string"},
+                                    "diag_id": {"$ref": "#/definitions/diag_id_type"},
                                     "status": {"enum": ["ready", "preparing"]},
                                     "path": {"type": "string"}
                                 },
@@ -103,7 +109,7 @@
                 "data": {
                     "type": "object",
                     "properties": {
-                        "diag_id": {"type": "string"}
+                        "diag_id": {"$ref": "#/definitions/diag_id_type"}
                     },
                     "additionalProperties": false,
                     "required": ["diag_id"]
@@ -121,7 +127,7 @@
                 "data": {
                     "type": "object",
                     "properties": {
-                        "diag_id": {"type": "string"}
+                        "diag_id": {"$ref": "#/definitions/diag_id_type"}
                     },
                     "additionalProperties": false,
                     "required": ["diag_id"]
@@ -139,7 +145,7 @@
                 "data": {
                     "type": "object",
                     "properties": {
-                        "diag_id": {"type": "string"},
+                        "diag_id": {"$ref": "#/definitions/diag_id_type"},
                         "result": {"type": "boolean"}
                     },
                     "additionalProperties": false,
