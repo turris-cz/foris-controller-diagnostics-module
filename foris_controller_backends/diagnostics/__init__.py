@@ -56,7 +56,7 @@ class DiagnosticsCmds(BaseCmdLine):
                 description_re = re.match(r"^\s{4}(.*)$", line)
                 if description_re and current_module:
                     modules[current_module] = description_re.group(1)
-            module_section_found = module_section_found or line.startswith("module:")
+            module_section_found = module_section_found or line.startswith("modules:")
 
         return modules
 
