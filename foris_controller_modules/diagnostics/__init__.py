@@ -41,9 +41,6 @@ class DiagnosticsModule(BaseModule):
         return {"result": self.handler.remove_diagnostic(diag_id), "diag_id": diag_id}
 
 
-Class = DiagnosticsModule
-
-
 @wrap_required_functions([
     'list_modules',
     'list_diagnostics',
