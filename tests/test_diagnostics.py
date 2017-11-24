@@ -1,5 +1,5 @@
 #
-# foris-controller
+# foris-controller-diagnostics-module
 # Copyright (C) 2017 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,17 @@
 #
 
 import time
+import pytest
+import subprocess
 
-from .fixtures import backend, clear_diagnostics, infrastructure, ubusd_test
+from .fixtures import backend, infrastructure, ubusd_test
+
+
+@pytest.fixture(scope="function")
+def clear_diagnostics():
+    process = subprocess.Popen(['rm', '-rf', '/tmp/diagnostics-*'])
+    process.wait()
+    yield process
 
 
 def test_diagnostics_list_modules(infrastructure, ubusd_test, clear_diagnostics):

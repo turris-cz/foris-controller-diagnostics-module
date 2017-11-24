@@ -1,5 +1,5 @@
 #
-# foris-controller
+# foris-controller-diagnostics-module
 # Copyright (C) 2017 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
@@ -25,9 +25,28 @@ import socket
 import subprocess
 import time
 import struct
+import sys
+import uuid
+
+from multiprocessing import Process, Value, Lock
+
+if sys.version_info < (3, 0):
+    import SocketServer
+else:
+    import socketserver
+    SocketServer = socketserver
 
 SOCK_PATH = "/tmp/foris-controller-test.soc"
 UBUS_PATH = "/tmp/ubus-foris-controller-test.soc"
+NOTIFICATION_SOCK_PATH = "/tmp/foris-controller-notifications-test.soc"
+NOTIFICATIONS_OUTPUT_PATH = "/tmp/foris-controller-notifications-test.json"
+
+notifications_lock = Lock()
+
+
+def chunks(data, size):
+    for i in range(0, len(data), size):
+        yield data[i:i + size]
 
 
 @pytest.fixture(scope="session")
@@ -41,11 +60,81 @@ def ubusd_test():
         pass
 
 
-@pytest.fixture(scope="function")
-def clear_diagnostics():
-    process = subprocess.Popen(['rm', '-rf', '/tmp/diagnostics-*'])
-    process.wait()
-    yield process
+def ubus_notification_listener(exiting):
+    import prctl
+    import signal
+    prctl.set_pdeathsig(signal.SIGKILL)
+    import ubus
+    ubus.connect(UBUS_PATH)
+    global notifications_lock
+
+    try:
+        os.unlink(NOTIFICATIONS_OUTPUT_PATH)
+    except OSError:
+        if os.path.exists(NOTIFICATIONS_OUTPUT_PATH):
+            raise
+
+    with open(NOTIFICATIONS_OUTPUT_PATH, "w") as f:
+        f.flush()
+
+        def handler(module, data):
+            module_name = module[len("foris-controller-"):]
+            with notifications_lock:
+                f.write(json.dumps({
+                    "module": module_name,
+                    "kind": "notification",
+                    "action": data["action"],
+                    "data": data["data"],
+                }) + "\n")
+                f.flush()
+
+        ubus.listen(("foris-controller-*", handler))
+        while True:
+            ubus.loop(200)
+            if exiting.value:
+                break
+
+
+def unix_notification_listener():
+    import prctl
+    import signal
+    from threading import Lock
+    lock = Lock()
+    prctl.set_pdeathsig(signal.SIGKILL)
+    global notifications_lock
+
+    try:
+        os.unlink(NOTIFICATION_SOCK_PATH)
+    except OSError:
+        if os.path.exists(NOTIFICATION_SOCK_PATH):
+            raise
+    try:
+        os.unlink(NOTIFICATIONS_OUTPUT_PATH)
+    except OSError:
+        if os.path.exists(NOTIFICATIONS_OUTPUT_PATH):
+            raise
+
+    class Server(SocketServer.ThreadingMixIn, SocketServer.UnixStreamServer):
+        pass
+
+    with open(NOTIFICATIONS_OUTPUT_PATH, "w") as f:
+        f.flush()
+
+        class Handler(SocketServer.StreamRequestHandler):
+            def handle(self):
+                while True:
+                    length_raw = self.rfile.read(4)
+                    if len(length_raw) != 4:
+                        break
+                    length = struct.unpack("I", length_raw)[0]
+                    data = self.rfile.read(length)
+                    with lock:
+                        with notifications_lock:
+                            f.write(data + "\n")
+                            f.flush()
+
+        server = Server(NOTIFICATION_SOCK_PATH, Handler)
+        server.serve_forever()
 
 
 class Infrastructure(object):
@@ -74,13 +163,39 @@ class Infrastructure(object):
             kwargs['stderr'] = devnull
             kwargs['stdout'] = devnull
 
-        self.server = subprocess.Popen([
-            "foris-controller", "-m", "diagnostics", "-d", "-b", backend_name,
-            name, "--path", self.sock_path
-        ], **kwargs)
+        self._exiting = Value('i', 0)
+        self._exiting.value = False
+
+        if name == "unix-socket":
+            self.listener = Process(target=unix_notification_listener, args=tuple())
+            self.listener.start()
+        elif name == "ubus":
+            self.listener = Process(target=ubus_notification_listener, args=(self._exiting, ))
+            self.listener.start()
+
+        args = [
+            "foris-controller",
+            "-m", "diagnostics",
+            "-d", "-b", backend_name, name, "--path", self.sock_path
+        ]
+
+        if name == "unix-socket":
+            args.append("--notifications-path")
+            args.append(NOTIFICATION_SOCK_PATH)
+            self.notification_sock_path = NOTIFICATION_SOCK_PATH
+        else:
+            self.notification_sock_path = self.sock_path
+
+        self.server = subprocess.Popen(args, **kwargs)
 
     def exit(self):
+        self._exiting.value = True
         self.server.kill()
+        self.listener.terminate()
+        try:
+            os.unlink(NOTIFICATIONS_OUTPUT_PATH)
+        except OSError:
+            pass
 
     def process_message(self, data):
         if self.name == "unix-socket":
@@ -94,6 +209,10 @@ class Infrastructure(object):
 
             length = struct.unpack("I", sock.recv(4))[0]
             received = sock.recv(length)
+            recv_len = len(received)
+            while recv_len < length:
+                received += sock.recv(length)
+                recv_len = len(received)
 
             return json.loads(received.decode("utf8"))
 
@@ -107,11 +226,50 @@ class Infrastructure(object):
                 ubus.connect(self.sock_path)
             function = data.get("action", "?")
             inner_data = data.get("data", {})
-            res = ubus.call(module, function, {"data": inner_data})
+            dumped_data = json.dumps(inner_data)
+            request_id = str(uuid.uuid4())
+            if len(dumped_data) > 512 * 1024:
+                for data_part in chunks(dumped_data, 512 * 1024):
+                    ubus.call(module, function, {
+                        "data": {}, "final": False, "multipart": True,
+                        "request_id": request_id, "multipart_data": data_part,
+                    })
+
+                res = ubus.call(module, function, {
+                    "data": {}, "final": True, "multipart": True,
+                    "request_id": request_id, "multipart_data": "",
+                })
+
+            else:
+                res = ubus.call(module, function, {
+                    "data": inner_data, "final": True, "multipart": False,
+                    "request_id": request_id, "multipart_data": "",
+                })
+
             ubus.disconnect()
-            return res[0]
+            return {
+                u"module": data["module"],
+                u"action": data["action"],
+                u"kind": u"reply",
+                u"data": json.loads("".join([e["data"] for e in res])),
+            }
 
         raise NotImplementedError()
+
+    def get_notifications(self, old_data=None):
+        while not os.path.exists(NOTIFICATIONS_OUTPUT_PATH):
+            time.sleep(0.2)
+
+        global notifications_lock
+
+        while True:
+            with notifications_lock:
+                with open(NOTIFICATIONS_OUTPUT_PATH) as f:
+                    data = f.readlines()
+                    last_data = [json.loads(e.strip()) for e in data]
+                    if not old_data == last_data:
+                        break
+        return last_data
 
 
 @pytest.fixture(scope="module")
