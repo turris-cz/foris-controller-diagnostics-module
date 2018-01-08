@@ -21,7 +21,7 @@ import time
 import pytest
 import subprocess
 
-from .fixtures import backend, infrastructure, ubusd_test
+from foris_controller_testtools.fixtures import backend, infrastructure, ubusd_test
 
 
 @pytest.fixture(scope="function")
