@@ -1,0 +1,39 @@
+#!modules/module.sh
+
+help="
+current and factory Turris OS version
+"
+
+version_omnia() {
+	local MNT="$(mktemp -d)"
+	mount -t btrfs -o ro,subvol=@factory /dev/mmcblk0p1 "$MNT"
+	cat "$MNT/etc/turris-version"
+	umount "$MNT"
+	rmdir "$MNT"
+}
+
+version_1x() {
+	local MNT="$(mktemp -d)"
+	mount -t squashfs /dev/mtdblock3 "$MNT"
+	tar -xJf "$MNT/medkit.tar.xz" ./etc/turris-version -O
+	umount "$MNT"
+	rmdir "$MNT"
+}
+
+run () {
+	echo_sec current
+	cat /etc/turris-version
+
+	echo_sec factory
+	case "$(cat /tmp/sysinfo/model)" in
+		"Turris")
+			version_1x
+			;;
+		"Turris Omnia")
+			version_omnia
+			;;
+		*)
+			echo "Can't identify Turris model!"
+			;;
+	esac
+}
