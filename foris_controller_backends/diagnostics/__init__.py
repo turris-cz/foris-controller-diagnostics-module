@@ -39,6 +39,7 @@ class DiagnosticsCmds(BaseCmdLine):
     def list_modules(self):
         args = (SCRIPT_PATH, "help")
         retval, stdout, stderr = self._run_command(*args)
+        stdout = stdout.decode("utf-8")
         if not retval == 0:
             logger.error("Listing diagnostics failed")
             logger.error("Error '%s':\n%s" % (args, stderr))

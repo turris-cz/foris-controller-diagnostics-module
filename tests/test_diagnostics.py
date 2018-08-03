@@ -37,7 +37,7 @@ def test_diagnostics_list_modules(infrastructure, ubusd_test, clear_diagnostics)
         "action": "list_modules",
         "kind": "request",
     })
-    assert res["data"].keys() == [
+    assert list(res["data"].keys()) == [
         u"modules",
     ]
 
