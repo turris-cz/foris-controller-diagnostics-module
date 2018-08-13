@@ -1,3 +1,10 @@
+0.4 (2018-08-13)
+----------------
+
+* python3 compatibility
+* reflect api chagnes
+* test updates
+
 0.3 (2017-12-13)
 ----------------
 
