@@ -43,6 +43,10 @@ setup(
     package_data={
         'foris_controller_modules.diagnostics': ['schema', 'schema/*.json'],
     },
+    namespace_packages=[
+        'foris_controller_modules',
+        'foris_controller_backends',
+    ],
     scripts=[],
     url='https://gitlab.labs.nic.cz/turris/foris-controller-diagnostics-module',
     description=DESCRIPTION,
