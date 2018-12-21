@@ -21,7 +21,9 @@ import time
 import pytest
 import subprocess
 
-from foris_controller_testtools.fixtures import backend, infrastructure, ubusd_test
+from foris_controller_testtools.fixtures import (
+    backend, infrastructure, ubusd_test, start_buses, mosquitto_test,
+)
 
 
 @pytest.fixture(scope="function")
@@ -31,7 +33,7 @@ def clear_diagnostics():
     yield process
 
 
-def test_diagnostics_list_modules(infrastructure, ubusd_test, clear_diagnostics):
+def test_diagnostics_list_modules(infrastructure, start_buses, clear_diagnostics):
     res = infrastructure.process_message({
         "module": "diagnostics",
         "action": "list_modules",
@@ -42,7 +44,7 @@ def test_diagnostics_list_modules(infrastructure, ubusd_test, clear_diagnostics)
     ]
 
 
-def test_diagnostics_list_diagnostics(infrastructure, ubusd_test, clear_diagnostics):
+def test_diagnostics_list_diagnostics(infrastructure, start_buses, clear_diagnostics):
     res = infrastructure.process_message({
         "module": "diagnostics",
         "action": "list_diagnostics",
@@ -51,7 +53,7 @@ def test_diagnostics_list_diagnostics(infrastructure, ubusd_test, clear_diagnost
     assert isinstance(res["data"]["diagnostics"], list)
 
 
-def test_diagnostics_prepare_diagnostic(infrastructure, ubusd_test, clear_diagnostics):
+def test_diagnostics_prepare_diagnostic(infrastructure, start_buses, clear_diagnostics):
     modules = ["processes"]
     res = infrastructure.process_message({
         "module": "diagnostics",
@@ -62,7 +64,7 @@ def test_diagnostics_prepare_diagnostic(infrastructure, ubusd_test, clear_diagno
     assert "diag_id" in res["data"]
 
 
-def test_diagnostics_remove_diagnostic(infrastructure, ubusd_test, clear_diagnostics):
+def test_diagnostics_remove_diagnostic(infrastructure, start_buses, clear_diagnostics):
     diag_id = "non-existing"
     res = infrastructure.process_message({
         "module": "diagnostics",
@@ -82,7 +84,7 @@ def test_diagnostics_remove_diagnostic(infrastructure, ubusd_test, clear_diagnos
     assert res["data"] == {"result": False, "diag_id": diag_id}
 
 
-def test_diagnostics_complex(infrastructure, ubusd_test, clear_diagnostics):
+def test_diagnostics_complex(infrastructure, start_buses, clear_diagnostics):
     length = len(infrastructure.process_message({
         "module": "diagnostics",
         "action": "list_diagnostics",
