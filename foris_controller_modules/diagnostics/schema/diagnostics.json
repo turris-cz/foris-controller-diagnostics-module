@@ -154,6 +154,87 @@
             },
             "additionalProperties": false,
             "required": ["data"]
+        },
+        {
+            "description": "Request to get sentry settings",
+            "properties": {
+                "module": {"enum": ["diagnostics"]},
+                "kind": {"enum": ["request"]},
+                "action": {"enum": ["get_sentry"]}
+            },
+            "additionalProperties": false
+        },
+        {
+            "description": "Reply to get sentry settings",
+            "properties": {
+                "module": {"enum": ["diagnostics"]},
+                "kind": {"enum": ["reply"]},
+                "action": {"enum": ["get_sentry"]},
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "dsn": {"type": "string"}
+                    },
+                    "additionalProperties": false,
+                    "required": ["dsn"]
+                }
+            },
+            "additionalProperties": false,
+            "required": ["data"]
+        },
+        {
+            "description": "Request to set sentry settings",
+            "properties": {
+                "module": {"enum": ["diagnostics"]},
+                "kind": {"enum": ["request"]},
+                "action": {"enum": ["set_sentry"]},
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "dsn": {"type": "string"}
+                    },
+                    "additionalProperties": false,
+                    "required": ["dsn"]
+                }
+            },
+            "additionalProperties": false,
+            "required": ["data"]
+        },
+        {
+            "description": "Notification that was set",
+            "properties": {
+                "module": {"enum": ["diagnostics"]},
+                "kind": {"enum": ["notification"]},
+                "action": {"enum": ["set_sentry"]},
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "dsn": {"type": "string"}
+                    },
+                    "additionalProperties": false,
+                    "required": ["dsn"]
+                }
+            },
+            "additionalProperties": false,
+            "required": ["data"]
+        },
+        {
+            "description": "Reply to set sentry settings",
+            "properties": {
+                "module": {"enum": ["diagnostics"]},
+                "kind": {"enum": ["reply"]},
+                "action": {"enum": ["set_sentry"]},
+                "data": {
+                    "type": "object",
+                    "properties": {
+                        "result": {"type": "boolean"}
+                    },
+                    "additionalProperties": false,
+                    "required": ["result"]
+                }
+            },
+            "additionalProperties": false,
+            "required": ["data"]
         }
     ]
 }

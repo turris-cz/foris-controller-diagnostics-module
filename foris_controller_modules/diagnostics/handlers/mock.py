@@ -32,6 +32,7 @@ logger = logging.getLogger("diagnostics.handlers.mock")
 
 class MockDiagnosticsHandler(Handler, BaseMockHandler):
     diagnostics = {}
+    dsn = ""
 
     @logger_wrapper(logger)
     def list_modules(self):
@@ -40,7 +41,8 @@ class MockDiagnosticsHandler(Handler, BaseMockHandler):
     @logger_wrapper(logger)
     def list_diagnostics(self):
         return sorted(
-            [dict(diag_id=k, **v) for k, v in self.diagnostics.items()], key=lambda x: x["diag_id"])
+            [dict(diag_id=k, **v) for k, v in self.diagnostics.items()], key=lambda x: x["diag_id"]
+        )
 
     @logger_wrapper(logger)
     def prepare_diagnostic(self, *modules):
@@ -55,6 +57,15 @@ class MockDiagnosticsHandler(Handler, BaseMockHandler):
     def remove_diagnostic(self, diag_id):
         try:
             del self.diagnostics[diag_id]
-        except:
+        except KeyError:
             return False
+        return True
+
+    @logger_wrapper(logger)
+    def get_sentry(self):
+        return {"dsn": MockDiagnosticsHandler.dsn}
+
+    @logger_wrapper(logger)
+    def set_sentry(self, dsn):
+        MockDiagnosticsHandler.dsn = dsn
         return True

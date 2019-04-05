@@ -1,6 +1,6 @@
 #
 # foris-controller
-# Copyright (C) 2017 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
+# Copyright (C) 2019 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import logging
 from foris_controller.handler_base import BaseOpenwrtHandler
 from foris_controller.utils import logger_wrapper
 
-from foris_controller_backends.diagnostics import DiagnosticsCmds
+from foris_controller_backends.diagnostics import DiagnosticsCmds, DiagnosticsUci
 
 from .. import Handler
 
@@ -31,20 +31,29 @@ logger = logging.getLogger("sample.handlers.diagnostics")
 
 class OpenwrtDiagnosticsHandler(Handler, BaseOpenwrtHandler):
 
-    diagnostics_cmds = DiagnosticsCmds()
+    cmds = DiagnosticsCmds()
+    uci = DiagnosticsUci()
 
     @logger_wrapper(logger)
     def list_modules(self):
-        return sorted(self.diagnostics_cmds.list_modules().keys())
+        return sorted(self.cmds.list_modules().keys())
 
     @logger_wrapper(logger)
     def list_diagnostics(self):
-        return self.diagnostics_cmds.list_diagnostics()
+        return self.cmds.list_diagnostics()
 
     @logger_wrapper(logger)
     def prepare_diagnostic(self, *modules):
-        return self.diagnostics_cmds.prepare_diagnostic(*modules)
+        return self.cmds.prepare_diagnostic(*modules)
 
     @logger_wrapper(logger)
     def remove_diagnostic(self, diag_id):
-        return self.diagnostics_cmds.remove_diagnostic(diag_id)
+        return self.cmds.remove_diagnostic(diag_id)
+
+    @logger_wrapper(logger)
+    def get_sentry(self):
+        return OpenwrtDiagnosticsHandler.uci.get_sentry()
+
+    @logger_wrapper(logger)
+    def set_sentry(self, dsn):
+        return OpenwrtDiagnosticsHandler.uci.set_sentry(dsn)

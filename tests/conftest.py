@@ -44,7 +44,7 @@ def cmdline_script_root():
 
 @pytest.fixture(scope="module")
 def controller_modules():
-    return ["diagnostics"]
+    return ["diagnostics", "remote"]
 
 
 def pytest_addoption(parser):

@@ -22,107 +22,153 @@ import pytest
 import subprocess
 
 from foris_controller_testtools.fixtures import (
-    backend, infrastructure, ubusd_test, start_buses, mosquitto_test,
+    backend,
+    infrastructure,
+    ubusd_test,
+    start_buses,
+    mosquitto_test,
+    uci_configs_init,
+    lighttpd_restart_command,
 )
+
+from foris_controller_testtools.utils import lighttpd_restart_was_called
 
 
 @pytest.fixture(scope="function")
 def clear_diagnostics():
-    process = subprocess.Popen(['rm', '-rf', '/tmp/diagnostics-*'])
+    process = subprocess.Popen(["rm", "-rf", "/tmp/diagnostics-*"])
     process.wait()
     yield process
 
 
 def test_diagnostics_list_modules(infrastructure, start_buses, clear_diagnostics):
-    res = infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "list_modules",
-        "kind": "request",
-    })
-    assert list(res["data"].keys()) == [
-        u"modules",
-    ]
+    res = infrastructure.process_message(
+        {"module": "diagnostics", "action": "list_modules", "kind": "request"}
+    )
+    assert list(res["data"].keys()) == [u"modules"]
 
 
 def test_diagnostics_list_diagnostics(infrastructure, start_buses, clear_diagnostics):
-    res = infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "list_diagnostics",
-        "kind": "request",
-    })
+    res = infrastructure.process_message(
+        {"module": "diagnostics", "action": "list_diagnostics", "kind": "request"}
+    )
     assert isinstance(res["data"]["diagnostics"], list)
 
 
 def test_diagnostics_prepare_diagnostic(infrastructure, start_buses, clear_diagnostics):
     modules = ["processes"]
-    res = infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "prepare_diagnostic",
-        "kind": "request",
-        "data": {"modules": modules},
-    })
+    res = infrastructure.process_message(
+        {
+            "module": "diagnostics",
+            "action": "prepare_diagnostic",
+            "kind": "request",
+            "data": {"modules": modules},
+        }
+    )
     assert "diag_id" in res["data"]
 
 
 def test_diagnostics_remove_diagnostic(infrastructure, start_buses, clear_diagnostics):
     diag_id = "non-existing"
-    res = infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "remove_diagnostic",
-        "kind": "request",
-        "data": {"diag_id": diag_id},
-    })
+    res = infrastructure.process_message(
+        {
+            "module": "diagnostics",
+            "action": "remove_diagnostic",
+            "kind": "request",
+            "data": {"diag_id": diag_id},
+        }
+    )
     assert "Incorrect input." in res["errors"][0]["description"]
 
     diag_id = "9999-99-99_ffffffff"
-    res = infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "remove_diagnostic",
-        "kind": "request",
-        "data": {"diag_id": diag_id},
-    })
+    res = infrastructure.process_message(
+        {
+            "module": "diagnostics",
+            "action": "remove_diagnostic",
+            "kind": "request",
+            "data": {"diag_id": diag_id},
+        }
+    )
     assert res["data"] == {"result": False, "diag_id": diag_id}
 
 
 def test_diagnostics_complex(infrastructure, start_buses, clear_diagnostics):
-    length = len(infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "list_diagnostics",
-        "kind": "request",
-    })["data"]["diagnostics"])
+    length = len(
+        infrastructure.process_message(
+            {"module": "diagnostics", "action": "list_diagnostics", "kind": "request"}
+        )["data"]["diagnostics"]
+    )
     # add a diagnostic
     modules = ["processes"]
-    res = infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "prepare_diagnostic",
-        "kind": "request",
-        "data": {"modules": modules},
-    })
+    res = infrastructure.process_message(
+        {
+            "module": "diagnostics",
+            "action": "prepare_diagnostic",
+            "kind": "request",
+            "data": {"modules": modules},
+        }
+    )
     diag_id = res["data"]["diag_id"]
 
     time.sleep(0.1)
     # check lenght
-    new_length = len(infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "list_diagnostics",
-        "kind": "request",
-    })["data"]["diagnostics"])
+    new_length = len(
+        infrastructure.process_message(
+            {"module": "diagnostics", "action": "list_diagnostics", "kind": "request"}
+        )["data"]["diagnostics"]
+    )
     assert new_length == length + 1
 
     # remove diagnostic
-    res = infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "remove_diagnostic",
-        "kind": "request",
-        "data": {"diag_id": diag_id},
-    })
+    res = infrastructure.process_message(
+        {
+            "module": "diagnostics",
+            "action": "remove_diagnostic",
+            "kind": "request",
+            "data": {"diag_id": diag_id},
+        }
+    )
     assert res["data"]["result"]
 
     time.sleep(0.1)
     # check lenght
-    new_length = len(infrastructure.process_message({
-        "module": "diagnostics",
-        "action": "list_diagnostics",
-        "kind": "request",
-    })["data"]["diagnostics"])
+    new_length = len(
+        infrastructure.process_message(
+            {"module": "diagnostics", "action": "list_diagnostics", "kind": "request"}
+        )["data"]["diagnostics"]
+    )
     assert new_length == length
+
+
+def test_sentry(infrastructure, start_buses, uci_configs_init, lighttpd_restart_command):
+    res = infrastructure.process_message(
+        {"module": "diagnostics", "action": "get_sentry", "kind": "request"}
+    )
+    assert "dsn" in res["data"]
+
+    filters = [("diagnostics", "set_sentry")]
+
+    # successful generation
+    notifications = infrastructure.get_notifications(filters=filters)
+
+    # update dsn
+    dsn = "https://XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX:YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY@sentry.labs.nic.cz/40"
+    res = infrastructure.process_message(
+        {"module": "diagnostics", "action": "set_sentry", "kind": "request", "data": {"dsn": dsn}}
+    )
+    assert res["data"]["result"]
+
+    notifications = infrastructure.get_notifications(notifications, filters=filters)
+    assert notifications[-1] == {
+        "module": "diagnostics",
+        "action": "set_sentry",
+        "kind": "notification",
+        "data": {"dsn": dsn},
+    }
+    if infrastructure.backend_name != "mock":
+        assert lighttpd_restart_was_called([])
+
+    res = infrastructure.process_message(
+        {"module": "diagnostics", "action": "get_sentry", "kind": "request"}
+    )
+    assert res["data"]["dsn"] == dsn

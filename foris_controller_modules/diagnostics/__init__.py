@@ -40,12 +40,25 @@ class DiagnosticsModule(BaseModule):
         diag_id = data["diag_id"]
         return {"result": self.handler.remove_diagnostic(diag_id), "diag_id": diag_id}
 
+    def action_get_sentry(self, data):
+        return self.handler.get_sentry()
 
-@wrap_required_functions([
-    'list_modules',
-    'list_diagnostics',
-    'prepare_diagnostic',
-    'remove_diagnostic',
-])
+    def action_set_sentry(self, data):
+        res = self.handler.set_sentry(**data)
+        if res:
+            self.notify("set_sentry", data)
+        return {"result": res}
+
+
+@wrap_required_functions(
+    [
+        "list_modules",
+        "list_diagnostics",
+        "prepare_diagnostic",
+        "remove_diagnostic",
+        "set_sentry",
+        "get_sentry",
+    ]
+)
 class Handler(object):
     pass

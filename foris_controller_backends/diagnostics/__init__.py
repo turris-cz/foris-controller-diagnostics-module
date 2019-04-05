@@ -1,6 +1,6 @@
 #
 # foris-controller-diagnostics-module
-# Copyright (C) 2017 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
+# Copyright (C) 2019 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@ import re
 
 from datetime import datetime
 from foris_controller_backends.cmdline import BaseCmdLine, BackendCommandFailed
+from foris_controller_backends.maintain import MaintainCommands
+from foris_controller_backends.uci import UciBackend, get_option_named
 
 logger = logging.getLogger("backends.diagnostics")
 
@@ -67,21 +69,17 @@ class DiagnosticsCmds(BaseCmdLine):
             expr = re.match(r"^/tmp/diagnostics-([^\.]+).*\.([^\.]+)$", path)
             if expr:
                 if expr.group(2) == "preparing":
-                    diagnostics.append({
-                        "diag_id": expr.group(1), "status": "preparing", "path": path
-                    })
+                    diagnostics.append(
+                        {"diag_id": expr.group(1), "status": "preparing", "path": path}
+                    )
                 elif expr.group(2) == "out":
-                    diagnostics.append({
-                        "diag_id": expr.group(1), "status": "ready", "path": path
-                    })
+                    diagnostics.append({"diag_id": expr.group(1), "status": "ready", "path": path})
         return sorted(diagnostics, key=lambda x: x["diag_id"])
 
     def prepare_diagnostic(self, *modules):
 
         diag_id = DiagnosticsCmds.generate_diag_id()
-        args = (
-            SCRIPT_PATH, "-b", "-o", "/tmp/diagnostics-%s.out" % diag_id
-        ) + modules
+        args = (SCRIPT_PATH, "-b", "-o", "/tmp/diagnostics-%s.out" % diag_id) + modules
         retval, stdout, stderr = self._run_command(*args)
         if not retval == 0:
             logger.error("Generating diagnostics has failed.")
@@ -93,6 +91,24 @@ class DiagnosticsCmds(BaseCmdLine):
     def remove_diagnostic(self, diag_id):
         try:
             os.remove("/tmp/diagnostics-%s.out" % diag_id)
-        except:
+        except (OSError, FileNotFoundError):
             return False
+        return True
+
+
+class DiagnosticsUci(object):
+    def get_sentry(self):
+        with UciBackend() as backend:
+            foris_data = backend.read("foris")
+            dsn = get_option_named(foris_data, "foris", "sentry", "dsn", "")
+
+        return {"dsn": dsn}
+
+    def set_sentry(self, dsn):
+        with UciBackend() as backend:
+            backend.add_section("foris", "sentry", "sentry")
+            backend.set_option("foris", "sentry", "dsn", dsn)
+
+        MaintainCommands().restart_lighttpd()
+
         return True
