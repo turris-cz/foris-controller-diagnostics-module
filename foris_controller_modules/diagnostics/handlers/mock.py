@@ -31,12 +31,16 @@ logger = logging.getLogger("diagnostics.handlers.mock")
 
 
 class MockDiagnosticsHandler(Handler, BaseMockHandler):
-    diagnostics = {}
+    diagnostics: dict = {}
     dsn = ""
 
     @logger_wrapper(logger)
     def list_modules(self):
-        return ["atsha", "processes", "uname"]
+        return [
+            {"module_id": "atsha", "description": "obtain atsha info"},
+            {"module_id": "processes", "description": "list running processes"},
+            {"module_id": "uname", "description": "how long is the router up"},
+        ]
 
     @logger_wrapper(logger)
     def list_diagnostics(self):

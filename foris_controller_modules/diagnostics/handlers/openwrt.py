@@ -36,7 +36,7 @@ class OpenwrtDiagnosticsHandler(Handler, BaseOpenwrtHandler):
 
     @logger_wrapper(logger)
     def list_modules(self):
-        return sorted(self.cmds.list_modules().keys())
+        return sorted(self.cmds.list_modules(), key=lambda x: (x["module_id"]))
 
     @logger_wrapper(logger)
     def list_diagnostics(self):

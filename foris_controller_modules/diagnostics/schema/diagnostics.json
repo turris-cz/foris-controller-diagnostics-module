@@ -27,7 +27,13 @@
                         "modules": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "object",
+                                "properties": {
+                                    "module_id": {"type": "string"},
+                                    "description": {"type": "string"}
+                                },
+                                "additionalProperties": false,
+                                "required": ["module_id", "description"]
                             }
                         }
                     },

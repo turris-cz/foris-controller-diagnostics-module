@@ -26,6 +26,7 @@ import re
 from datetime import datetime
 from foris_controller_backends.cmdline import BaseCmdLine, BackendCommandFailed
 from foris_controller_backends.maintain import MaintainCommands
+from foris_controller_backends.web import WebUciCommands
 from foris_controller_backends.uci import UciBackend, get_option_named
 
 logger = logging.getLogger("backends.diagnostics")
@@ -39,8 +40,10 @@ class DiagnosticsCmds(BaseCmdLine):
         return "%s_%08x" % (datetime.now().strftime("%Y-%m-%d"), random.randrange(0x100000000))
 
     def list_modules(self):
+        lang = WebUciCommands().get_data()["language"]
+        env = {"LANGUAGE": lang, "LANG": lang}
         args = (SCRIPT_PATH, "help")
-        retval, stdout, stderr = self._run_command(*args)
+        retval, stdout, stderr = self._run_command(*args, env=env)
         stdout = stdout.decode("utf-8")
         if not retval == 0:
             logger.error("Listing diagnostics failed")
@@ -48,7 +51,7 @@ class DiagnosticsCmds(BaseCmdLine):
             raise BackendCommandFailed(retval, args)
 
         module_section_found = False
-        modules = {}
+        modules = []
         # parse output
         for line in stdout.split("\n"):
             if module_section_found:
@@ -58,7 +61,9 @@ class DiagnosticsCmds(BaseCmdLine):
                     continue
                 description_re = re.match(r"^\s{4}(.*)$", line)
                 if description_re and current_module:
-                    modules[current_module] = description_re.group(1)
+                    modules.append(
+                        {"module_id": current_module, "description": description_re.group(1) or ""}
+                    )
             module_section_found = module_section_found or line.startswith("modules:")
 
         return modules
