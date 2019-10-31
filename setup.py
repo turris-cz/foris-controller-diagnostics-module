@@ -28,43 +28,30 @@ Diagnostics module for foris-controller (wrapper around diagnostics cmd)
 """
 
 setup(
-    name='foris-controller-diagnostics-module',
+    name="foris-controller-diagnostics-module",
     version=__version__,
-    author='CZ.NIC, z.s.p.o. (http://www.nic.cz/)',
-    author_email='stepan.henek@nic.cz',
+    author="CZ.NIC, z.s.p.o. (http://www.nic.cz/)",
+    author_email="stepan.henek@nic.cz",
     packages=[
-        'foris_controller_diagnostics_module',
-        'foris_controller_backends',
-        'foris_controller_backends.diagnostics',
-        'foris_controller_modules',
-        'foris_controller_modules.diagnostics',
-        'foris_controller_modules.diagnostics.handlers',
+        "foris_controller_diagnostics_module",
+        "foris_controller_backends",
+        "foris_controller_backends.diagnostics",
+        "foris_controller_modules",
+        "foris_controller_modules.diagnostics",
+        "foris_controller_modules.diagnostics.handlers",
     ],
-    package_data={
-        'foris_controller_modules.diagnostics': ['schema', 'schema/*.json'],
-    },
-    namespace_packages=[
-        'foris_controller_modules',
-        'foris_controller_backends',
-    ],
+    package_data={"foris_controller_modules.diagnostics": ["schema", "schema/*.json"]},
+    namespace_packages=["foris_controller_modules", "foris_controller_backends"],
     scripts=[],
-    url='https://gitlab.labs.nic.cz/turris/foris-controller-diagnostics-module',
+    url="https://gitlab.labs.nic.cz/turris/foris-controller-diagnostics-module",
     description=DESCRIPTION,
-    long_description=open('README.rst').read(),
+    long_description=open("README.rst").read(),
     license="GPLv3",
     install_requires=[
-        "foris-controller @ git+https://gitlab.labs.nic.cz/turris/foris-controller.git#egg=foris-controller",
+        "foris-controller @ git+https://gitlab.labs.nic.cz/turris/foris-controller.git#egg=foris-controller"
     ],
-    setup_requires=[
-        'pytest-runner',
-    ],
-    tests_require=[
-        'pytest',
-        'foris-controller-testtools',
-        'foris-client',
-        'ubus',
-        'paho-mqtt',
-    ],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest", "foris-controller-testtools", "foris-client", "ubus", "paho-mqtt"],
     dependency_links=[
         "git+https://gitlab.labs.nic.cz/turris/foris-controller-testtools.git#egg=foris-controller-testtools",
         "git+https://gitlab.labs.nic.cz/turris/foris-client.git#egg=foris-client",
