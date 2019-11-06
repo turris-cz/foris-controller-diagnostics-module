@@ -64,7 +64,7 @@ class DiagnosticsCmds(BaseCmdLine):
                     modules.append(
                         {"module_id": current_module, "description": description_re.group(1) or ""}
                     )
-            module_section_found = module_section_found or line.startswith("modules:")
+            module_section_found = module_section_found or line.strip().endswith(":")
 
         return modules
 
