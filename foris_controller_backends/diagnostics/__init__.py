@@ -37,7 +37,7 @@ SCRIPT_PATH = "/usr/share/diagnostics/diagnostics.sh"
 class DiagnosticsCmds(BaseCmdLine):
     @staticmethod
     def generate_diag_id():
-        return "%s_%08x" % (datetime.now().strftime("%Y-%m-%d"), random.randrange(0x100000000))
+        return f"{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}_{random.randrange(0x100000000):08x}"
 
     def list_modules(self):
         lang = WebUciCommands().get_data()["language"]

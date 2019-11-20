@@ -50,7 +50,9 @@ class MockDiagnosticsHandler(Handler, BaseMockHandler):
 
     @logger_wrapper(logger)
     def prepare_diagnostic(self, *modules):
-        diag_id = "%s_%08x" % (datetime.now().strftime("%Y-%m-%d"), random.randrange(0x100000000))
+        diag_id = (
+            f"{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}_{random.randrange(0x100000000):08x}"
+        )
         self.diagnostics[diag_id] = {
             "status": random.choice(["ready", "preparing"]),
             "path": "/tmp/diagnostics-%s.out" % diag_id,

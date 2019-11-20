@@ -94,7 +94,7 @@ def test_diagnostics_remove_diagnostic(
     )
     assert "Incorrect input." in res["errors"][0]["description"]
 
-    diag_id = "9999-99-99_ffffffff"
+    diag_id = "9999-99-99-99-99-99_ffffffff"
     res = infrastructure.process_message(
         {
             "module": "diagnostics",
