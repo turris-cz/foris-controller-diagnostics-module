@@ -1,6 +1,6 @@
 #
 # foris-controller-diagnostics-module
-# Copyright (C) 2019 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
+# Copyright (C) 2019-2020 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -52,12 +52,15 @@ class DiagnosticsCmds(BaseCmdLine):
 
         module_section_found = False
         modules = []
+
+        current_module = None
         # parse output
         for line in stdout.split("\n"):
             if module_section_found:
-                module_re = re.match(r"^\s{2}(\w+)$", line)
+                # e.g. 05_long-module-name
+                module_re = re.match(r"^\s{2}([0-9]*_|)([a-zA-Z_-]+)$", line)
                 if module_re:
-                    current_module = module_re.group(1)
+                    current_module = module_re.group(2)
                     continue
                 description_re = re.match(r"^\s{4}(.*)$", line)
                 if description_re and current_module:
