@@ -2,7 +2,7 @@
 
 #
 # foris-controller-diagnostics-module
-# Copyright (C) 2017 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
+# Copyright (C) 2017-2020 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ setup(
     name="foris-controller-diagnostics-module",
     version=__version__,
     author="CZ.NIC, z.s.p.o. (http://www.nic.cz/)",
-    author_email="stepan.henek@nic.cz",
+    author_email="packaging@turris.cz",
     packages=[
         "foris_controller_diagnostics_module",
         "foris_controller_backends",
