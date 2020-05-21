@@ -58,9 +58,9 @@ class DiagnosticsCmds(BaseCmdLine):
         for line in stdout.split("\n"):
             if module_section_found:
                 # e.g. 05_long-module-name
-                module_re = re.match(r"^\s{2}([0-9]*_|)([a-zA-Z_-]+)$", line)
+                module_re = re.match(r"\s{2}(([0-9_]+)?[a-zA-Z_-]+)$", line)
                 if module_re:
-                    current_module = module_re.group(2)
+                    current_module = module_re.group(1)
                     continue
                 description_re = re.match(r"^\s{4}(.*)$", line)
                 if description_re and current_module:
@@ -85,13 +85,12 @@ class DiagnosticsCmds(BaseCmdLine):
         return sorted(diagnostics, key=lambda x: x["diag_id"])
 
     def prepare_diagnostic(self, *modules):
-
         diag_id = DiagnosticsCmds.generate_diag_id()
         args = (SCRIPT_PATH, "-b", "-o", "/tmp/diagnostics-%s.out" % diag_id) + modules
         retval, stdout, stderr = self._run_command(*args)
         if not retval == 0:
             logger.error("Generating diagnostics has failed.")
-            logger.debug("Error '%s' :\n%s" % (args, stderr))
+            logger.debug("Error '%s' :\n%s", args, stderr)
             raise BackendCommandFailed(retval, args)
 
         return diag_id

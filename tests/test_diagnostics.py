@@ -1,6 +1,6 @@
 #
 # foris-controller-diagnostics-module
-# Copyright (C) 2017 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
+# Copyright (C) 2017, 2020 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ def test_diagnostics_list_modules(
     res = infrastructure.process_message(
         {"module": "diagnostics", "action": "list_modules", "kind": "request"}
     )
-    assert list(res["data"].keys()) == [u"modules"]
+    assert res["data"].keys() == {"modules"}
 
 
 @pytest.mark.parametrize("device,turris_os_version", [("mox", "4.0")], indirect=True)
@@ -67,7 +67,7 @@ def test_diagnostics_list_diagnostics(
 def test_diagnostics_prepare_diagnostic(
     infrastructure, start_buses, clear_diagnostics, device, turris_os_version
 ):
-    modules = ["processes"]
+    modules = ["15_processes"]
     res = infrastructure.process_message(
         {
             "module": "diagnostics",
@@ -116,7 +116,7 @@ def test_diagnostics_complex(
         )["data"]["diagnostics"]
     )
     # add a diagnostic
-    modules = ["processes"]
+    modules = ["15_processes"]
     res = infrastructure.process_message(
         {
             "module": "diagnostics",

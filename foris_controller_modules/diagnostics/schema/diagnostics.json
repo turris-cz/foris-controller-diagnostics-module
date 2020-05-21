@@ -3,6 +3,10 @@
         "diag_id_type": {
             "type": "string",
             "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{2}_[a-z0-9]{8}$"
+        },
+        "module_id": {
+            "type": "string",
+            "pattern": "^([0-9_]+)?[a-zA-Z_-]+$"
         }
     },
     "oneOf": [
@@ -29,7 +33,7 @@
                             "items": {
                                 "type": "object",
                                 "properties": {
-                                    "module_id": {"type": "string"},
+                                    "module_id": {"$ref": "#/definitions/module_id"},
                                     "description": {"type": "string"}
                                 },
                                 "additionalProperties": false,
@@ -95,7 +99,7 @@
                         "modules": {
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "$ref": "#/definitions/module_id"
                             }
                         }
                     },

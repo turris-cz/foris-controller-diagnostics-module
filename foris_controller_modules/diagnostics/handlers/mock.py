@@ -1,6 +1,6 @@
 #
 # foris-controller
-# Copyright (C) 2017 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
+# Copyright (C) 2017, 2020 CZ.NIC, z.s.p.o. (http://www.nic.cz/)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,6 +29,14 @@ from .. import Handler
 
 logger = logging.getLogger("diagnostics.handlers.mock")
 
+MODULES = {
+    "atsha": {"module_id": "atsha", "description": "obtain atsha info"},
+    "15_processes": {"module_id": "15_processes", "description": "list running processes"},
+    "42_long-module-name": {
+        "module_id": "42_long-module-name", "description": "some long module with dashes in name"
+    },
+}
+
 
 class MockDiagnosticsHandler(Handler, BaseMockHandler):
     diagnostics: dict = {}
@@ -36,11 +44,7 @@ class MockDiagnosticsHandler(Handler, BaseMockHandler):
 
     @logger_wrapper(logger)
     def list_modules(self):
-        return [
-            {"module_id": "atsha", "description": "obtain atsha info"},
-            {"module_id": "processes", "description": "list running processes"},
-            {"module_id": "uname", "description": "how long is the router up"},
-        ]
+        return list(MODULES.values())
 
     @logger_wrapper(logger)
     def list_diagnostics(self):
