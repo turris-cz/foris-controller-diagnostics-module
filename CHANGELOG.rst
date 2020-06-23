@@ -1,3 +1,8 @@
+1.0.4 (2020-06-24)
+------------------
+
+* revert regex to match whole module name as module_id
+
 1.0.3 (2020-05-14)
 ------------------
 
