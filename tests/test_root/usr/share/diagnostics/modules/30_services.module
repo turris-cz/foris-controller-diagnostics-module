@@ -1,0 +1,15 @@
+#!modules/module.sh
+
+help="
+$(gettext "Examine running services and show whether the services are started after boot.")
+"
+
+run () {
+	section "Service list trough ubus"
+	ubus call service list '{"verbose": true}'
+
+	section "List enabled services (/etc/rc.d)"
+	ls -al /etc/rc.d/
+}
+
+# vim: ft=sh

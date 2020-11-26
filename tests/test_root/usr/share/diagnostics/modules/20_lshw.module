@@ -1,0 +1,20 @@
+#!modules/module.sh
+
+help="
+$(gettext "List detected hardware on USB and PCI.")
+"
+
+run () {
+	section cpuinfo
+	cat /proc/cpuinfo
+	section meminfo
+	cat /proc/meminfo
+	section lsusb
+	lsusb -vvv
+	section lspci
+	lspci -vvv
+	section sensors
+	sensors
+}
+
+# vim: ft=sh

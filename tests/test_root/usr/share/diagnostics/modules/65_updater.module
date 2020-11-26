@@ -1,0 +1,27 @@
+#!modules/module.sh
+
+help="
+$(gettext "Dump configuration and try to run the updater.")
+"
+
+run () {
+	section "Updater UCI config"
+	dump_file '/etc/config/updater'
+
+	section "Updater configuration"
+	local updater_confdir='/etc/updater/conf.d'
+	local updater_conffile
+	if [ -d "$updater_confdir" ]; then
+		find "$updater_confdir" -type f -name '*.lua' \
+			| while read -r updater_conffile; do
+				dump_file "$updater_conffile"
+			done
+	else
+		error "There is no '$updater_confdir' directory"
+	fi
+
+	section "Updater execution"
+	pkgupdate -e TRACE
+}
+
+# vim: ft=sh

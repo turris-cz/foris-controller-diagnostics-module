@@ -1,0 +1,30 @@
+#!modules/module.sh
+
+help="
+$(gettext "Prints UCI network and wireless settings, current IP addresses, and routes.")
+"
+
+run () {
+	section "Uci wireless"
+	uci show wireless | grep -v ".key="
+
+	section "Uci network"
+	uci show network
+
+	section "Uci dhcp"
+	uci show dhcp
+
+	section "Links"
+	ip -d link
+
+
+	section "IPv4"
+	ip -d -4 address
+	ip -d -4 route
+
+	section "IPv6"
+	ip -d -6 address
+	ip -d -6 route
+}
+
+# vim: ft=sh

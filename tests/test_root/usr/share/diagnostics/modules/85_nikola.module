@@ -1,0 +1,12 @@
+#!modules/module.sh
+
+help="
+$(gettext "Try to send firewall logs to the server.")
+"
+
+run () {
+	check_installed nikola || return 0
+	nikola
+}
+
+# vim: ft=sh

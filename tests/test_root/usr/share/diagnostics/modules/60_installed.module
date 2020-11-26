@@ -1,9 +1,11 @@
 #!modules/module.sh
 
 help="
-list installed packages
+$(gettext "List installed packages.")
 "
 
 run () {
 	opkg list-installed
 }
+
+# vim: ft=sh

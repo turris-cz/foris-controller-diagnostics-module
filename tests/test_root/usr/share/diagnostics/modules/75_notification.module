@@ -1,0 +1,16 @@
+#!modules/module.sh
+
+help="
+$(gettext "Generate and send Turris notification.")
+"
+
+run () {
+	local message='This is a testing notification generated from Turris diagnostics.
+
+You can ignore this message'
+
+	# Create and send error notification immediately
+	create_notification -t -s error "$message"
+}
+
+# vim: ft=sh

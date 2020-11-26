@@ -1,0 +1,23 @@
+#!modules/module.sh
+
+help="
+$(gettext "Print UCI firewall settings and the current content of iptables.")
+"
+
+run () {
+	section "Uci firewall configuration"
+	uci show firewall
+	uci show firewall-turris
+
+	section "md5sum of firewall scripts"
+	md5sum /usr/share/firewall/*
+
+	section "List of user defined scripts"
+	ls -al /etc/firewall.user
+	ls -al /etc/firewall.d/*
+
+	section "Current iptables configuration"
+	iptables-save
+}
+
+# vim: ft=sh

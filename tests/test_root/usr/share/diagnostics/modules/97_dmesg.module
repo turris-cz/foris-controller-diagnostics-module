@@ -1,0 +1,11 @@
+#!modules/module.sh
+
+help="
+$(gettext "Display output of dmesg.")
+"
+
+run () {
+	dmesg
+}
+
+# vim: ft=sh

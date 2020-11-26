@@ -1,0 +1,11 @@
+#!modules/module.sh
+
+help="
+$(gettext "Show info about Linux kernel.")
+"
+
+run () {
+	uname -a
+}
+
+# vim: ft=sh

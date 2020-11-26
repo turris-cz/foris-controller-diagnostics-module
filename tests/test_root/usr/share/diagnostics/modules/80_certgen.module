@@ -1,0 +1,30 @@
+#!modules/module.sh
+
+help="
+$(gettext "Run Sentinel Certgen.")
+"
+
+run () {
+	check_installed 'sentinel-certgen' || return 0
+
+	section "Sentinel Certgen certs"
+	check_installed 'sentinel-proxy' && {
+		local certgen_hooksdir='/etc/sentinel-certgen_hooks.d'
+		if [ -d "$certgen_hooksdir" ]; then
+			subsection "List of Certgen hooks"
+			ls -1 "$certgen_hooksdir/"
+
+			subsection "Generate certificate for Sentinel Proxy with hooks"
+			sentinel-certgen certs --hooks-dir "$certgen_hooksdir"
+
+		else
+			subsection "Generate certificate for Sentinel Proxy without hooks"
+			sentinel-certgen certs
+		fi
+	}
+
+	section "Sentinel Mailpass"
+	echo "See notification module"
+}
+
+# vim: ft=sh

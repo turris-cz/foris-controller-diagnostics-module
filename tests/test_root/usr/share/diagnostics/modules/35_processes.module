@@ -1,0 +1,15 @@
+#!modules/module.sh
+
+help="
+$(gettext "List running processes.")
+"
+
+run () {
+	section "ps w"
+	busybox ps w
+
+	section "pstree"
+	pstree -a
+}
+
+# vim: ft=sh

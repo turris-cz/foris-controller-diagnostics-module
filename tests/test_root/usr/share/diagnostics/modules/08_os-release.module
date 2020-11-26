@@ -1,0 +1,64 @@
+#!modules/module.sh
+
+help="
+$(gettext "Current and factory /etc/os-release file (/etc/turris-version for factory as well).")
+"
+
+version_btrfs() {
+	local device="$1"
+	local mnt="$(mktemp -d)"
+	mount -t btrfs -o ro,subvol=@factory "$device" "$mnt" || {
+		error "Could not mount factory image"
+		rmdir "$mnt"
+		return 1
+	}
+
+	dump_file "$mnt/etc/turris-version"
+	dump_file "$mnt/etc/os-release"
+
+	umount "$mnt"
+	rmdir "$mnt"
+}
+
+version_1x() {
+	local mnt="$(mktemp -d)"
+	mount -t squashfs /dev/mtdblock3 "$mnt" || {
+		error "Could not mount factory image"
+		rmdir "$mnt"
+		return 1
+	}
+
+	file_header "medkit: ./etc/turris-version"
+	tar -xJf "$mnt/medkit.tar.xz" -O ./etc/turris-version
+	file_header "medkit: ./etc/os-release"
+	tar -xJf "$mnt/medkit.tar.xz" -O ./etc/os-release
+
+	umount "$mnt"
+	rmdir "$mnt"
+}
+
+run () {
+	section "Current"
+	dump_file '/etc/os-release'
+
+	section "Factory"
+	(
+	. /etc/os-release
+	case "$OPENWRT_DEVICE_PRODUCT" in
+		"Turris 1.x")
+			version_1x
+			;;
+		"Turris Omnia")
+			version_btrfs /dev/mmcblk0p1
+			;;
+		"Turris Mox")
+			version_btrfs /dev/mmcblk1p1
+			;;
+		*)
+			error "Can't identify Turris model"
+			;;
+	esac
+	)
+}
+
+# vim: ft=sh

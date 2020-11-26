@@ -1,0 +1,74 @@
+#!modules/module.sh
+
+help="
+$(gettext "Gather DNS related information.")
+"
+
+resolve() {
+	subsection "Attempting to resolve $1"
+	dig @127.0.0.1 +dnssec "$1"
+}
+
+run () {
+	local file rootkeyfile resolver kresd_tty
+
+	section "Resolver config"
+	uci -q show resolver
+
+	section "resolv.conf*"
+	for file in /etc/resolv.conf* /tmp/resolv.conf*; do
+		dump_file "$file"
+	done
+
+	section "DNSSEC root key file"
+	rootkeyfile="$(uci get resolver.common.keyfile)"
+	dump_file "$rootkeyfile"
+	section "And its attributes"
+	ls -al "$rootkeyfile"
+	md5sum "$rootkeyfile"
+
+	section "Resolver process"
+	resolver="$(uci get resolver.common.prefered_resolver)"
+	ps w | grep "$resolver"
+
+	if [ "$resolver" == "kresd" ]; then
+		section "Configured trust anchors"
+		kresd_tty="$(uci get resolver.kresd.rundir)/control/$(pidof kresd)"
+		echo "trust_anchors" | socat - "unix-connect:${kresd_tty}"
+		echo
+
+		section "Generated kresd.config"
+		dump_file "/tmp/kresd.config"
+	fi
+
+	forward_custom="$(uci -q get resolver.common.forward_custom)"
+
+	if [ ! -z "$forward_custom" ]; then
+		section "Custom forwarders configs"
+		for file in /etc/resolver/dns_servers/*.conf; do
+			dump_file "$file"
+		done
+	fi
+
+	section "Resolution attempts"
+	# should pass
+	resolve repo.turris.cz
+	resolve nic.cz
+	resolve www.google.com
+	resolve www.facebook.com
+	resolve www.youtube.com
+
+	resolve '*.wilda.nsec.0skar.cz'
+	resolve '*.wild.nsec.0skar.cz'
+	resolve '*.wilda.0skar.cz'
+	resolve '*.wild.0skar.cz'
+	resolve www.wilda.nsec.0skar.cz
+	resolve www.wilda.0skar.cz
+
+	# should fail
+	resolve www.rhybar.cz
+	resolve '*.wilda.rhybar.0skar.cz'
+	resolve '*.wilda.rhybar.ecdsa.0skar.cz'
+}
+
+# vim: ft=sh

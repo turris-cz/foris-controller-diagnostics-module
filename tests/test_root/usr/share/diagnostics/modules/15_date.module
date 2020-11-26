@@ -1,0 +1,39 @@
+#!modules/module.sh
+
+help="
+$(gettext "Print current date and verify that NTP can synchronize time.")
+"
+
+get_system_config() {
+	local option="$1"
+	uci -q get "system.@system[0].$option" \
+		|| error "Can not get $option configuration"
+}
+
+
+run () {
+	section "Current time"
+	date
+
+	section "UCI configuration"
+	subsection "zonename"
+	get_system_config "zonename"
+	subsection "timezone"
+	get_system_config "timezone"
+	subsection "country"
+	get_system_config "_country"
+	subsection "NTP configuration"
+	uci -q show 'system.ntp' || error 'Can not get ntp configuration'
+
+	section "NTPd"
+	subsection "Is /etc/init.d/sysntpd enabled?"
+	md5sum /etc/init.d/*sysntpd* /etc/rc.d/*sysntpd*
+
+	subsection "Restart /etc/init.d/sysntpd to force sync"
+	/etc/init.d/sysntpd restart && echo "OK"
+
+	section "Current time after sync"
+	date
+}
+
+# vim: ft=sh

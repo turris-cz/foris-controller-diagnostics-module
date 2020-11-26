@@ -1,0 +1,19 @@
+#!modules/module.sh
+
+help="
+$(gettext "Test whether the Turris webs are available.")
+"
+
+test_web() {
+	local url="$1"
+	shift
+	section "$url"
+	curl --location --verbose "$url" https://api.turris.cz/ > /dev/null
+}
+
+run () {
+	test_web "https://repo.turris.cz"
+	test_web "https://www.turris.cz"
+}
+
+# vim: ft=sh

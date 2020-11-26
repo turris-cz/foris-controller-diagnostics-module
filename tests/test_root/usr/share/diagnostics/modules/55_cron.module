@@ -1,0 +1,31 @@
+#!modules/module.sh
+
+help="
+$(gettext "Info about the cron.")
+"
+
+run () {
+	section "Is cron running?"
+	busybox ps w | grep cron | grep -v 'grep\|cron\.module\|diagnostics'
+
+	if which crond > /dev/null; then
+		section "Package providing crond:"
+		opkg info "$(opkg search "$(which crond)" | awk '{print $1}')"
+	elif which cron > /dev/null; then
+		section "Package providing cron:"
+		opkg info "$(opkg search "$(which cron)" | awk '{print $1}')"
+	else
+		error "There is no crond nor cron executable!"
+	fi
+
+	local file
+	section "Cronfiles"
+	for file in /etc/cron.d/* /etc/crontabs/*; do
+		dump_file "$file"
+	done
+
+	section "Is cron service enabled?"
+	find /etc/init.d /etc/rc.d -name '*cron*' -exec md5sum {} \;
+}
+
+# vim: ft=sh

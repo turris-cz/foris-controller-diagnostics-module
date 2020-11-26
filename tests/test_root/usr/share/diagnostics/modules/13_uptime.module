@@ -1,0 +1,11 @@
+#!modules/module.sh
+
+help="
+$(gettext "Show how long is the router running.")
+"
+
+run () {
+	uptime
+}
+
+# vim: ft=sh

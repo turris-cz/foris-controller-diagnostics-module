@@ -1,0 +1,14 @@
+#!modules/module.sh
+
+help="
+$(gettext "List all mount points and mount options and all block devices.")
+"
+
+run () {
+	section mount
+	mount
+	section lsblk
+	lsblk -O
+}
+
+# vim: ft=sh

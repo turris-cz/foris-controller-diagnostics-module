@@ -1,0 +1,14 @@
+#!modules/module.sh
+
+help="
+$(gettext "Show mounted devices and examine files in /tmp/.")
+"
+
+run () {
+	section "df -h"
+	df -h
+	section "du -ahcx /tmp"
+	du -ahcx /tmp/
+}
+
+# vim: ft=sh

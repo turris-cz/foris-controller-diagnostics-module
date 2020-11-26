@@ -1,0 +1,26 @@
+#!modules/module.sh
+
+help="
+$(gettext "Read system logs.")
+"
+
+read_messages () {
+	local path="$1"
+	ls -rt "$path"/messages* | while read -r path; do
+		section "$path"
+		if [ "${path: -3}" = '.gz' ] ; then
+			zcat "$path"
+		else
+			cat "$path"
+		fi
+	done
+}
+
+run () {
+	read_messages /var/log
+	if [ -d /srv/log ]; then
+		read_messages /srv/log
+	fi
+}
+
+# vim: ft=sh

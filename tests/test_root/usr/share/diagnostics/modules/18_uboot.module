@@ -1,0 +1,11 @@
+#!modules/module.sh
+
+help="
+$(gettext "Lists U-Boot environment.")
+"
+
+run () {
+	fw_printenv
+}
+
+# vim: ft=sh

@@ -1,0 +1,11 @@
+#!modules/module.sh
+
+help="
+$(gettext "Prints all listening sockets.")
+"
+
+run () {
+	netstat -alpeW
+}
+
+# vim: ft=sh
