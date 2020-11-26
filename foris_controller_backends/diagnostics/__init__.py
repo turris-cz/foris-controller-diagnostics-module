@@ -42,7 +42,7 @@ class DiagnosticsCmds(BaseCmdLine):
     def list_modules(self):
         lang = WebUciCommands().get_data()["language"]
         env = {"LANGUAGE": lang, "LANG": lang}
-        args = (SCRIPT_PATH, "help")
+        args = (SCRIPT_PATH, "-l")
         retval, stdout, stderr = self._run_command(*args, env=env)
         stdout = stdout.decode("utf-8")
         if not retval == 0:
@@ -50,24 +50,20 @@ class DiagnosticsCmds(BaseCmdLine):
             logger.error("Error '%s':\n%s" % (args, stderr))
             raise BackendCommandFailed(retval, args)
 
-        module_section_found = False
         modules = []
-
-        current_module = None
         # parse output
-        for line in stdout.split("\n"):
-            if module_section_found:
-                # e.g. 05_long-module-name
-                module_re = re.match(r"\s{2}(([0-9_]+)?[a-zA-Z_-]+)$", line)
-                if module_re:
-                    current_module = module_re.group(1)
+        for line in stdout.rstrip("\n").split("\n"):
+            if not line.startswith(" "):
+                modules.append({"module_id": line, "description": ""})
+            else:
+                if not modules:
+                    logger.error("Unexpected line in diagnostics listing: %s", line)
                     continue
-                description_re = re.match(r"^\s{4}(.*)$", line)
-                if description_re and current_module:
-                    modules.append(
-                        {"module_id": current_module, "description": description_re.group(1) or ""}
-                    )
-            module_section_found = module_section_found or line.strip().endswith(":")
+                line = line[1:]  # remove leading space
+                description = line
+                if modules[-1]["description"]:
+                    description = '\n'.join((modules[-1]["description"], line))
+                modules[-1]["description"] = description
 
         return modules
 

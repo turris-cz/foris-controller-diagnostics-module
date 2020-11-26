@@ -6,7 +6,7 @@
         },
         "module_id": {
             "type": "string",
-            "pattern": "^([0-9_]+)?[a-zA-Z_-]+$"
+            "pattern": "^[a-zA-Z0-9_-]+$"
         }
     },
     "oneOf": [
