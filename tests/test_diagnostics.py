@@ -31,6 +31,7 @@ from foris_controller_testtools.fixtures import (
     lighttpd_restart_command,
     turris_os_version,
     device,
+    cmdline_file,
 )
 
 from foris_controller_testtools.utils import lighttpd_restart_was_called
@@ -43,9 +44,9 @@ def clear_diagnostics():
     yield process
 
 
-@pytest.mark.parametrize("device,turris_os_version", [("mox", "4.0")], indirect=True)
+@pytest.mark.parametrize("device,cmdline_file,turris_os_version", [("mox", "mox", "4.0")], indirect=True)
 def test_diagnostics_list_modules(
-    infrastructure, start_buses, clear_diagnostics, device, turris_os_version
+    infrastructure, start_buses, clear_diagnostics, device, cmdline_file, turris_os_version
 ):
     res = infrastructure.process_message(
         {"module": "diagnostics", "action": "list_modules", "kind": "request"}
@@ -106,9 +107,9 @@ def test_diagnostics_remove_diagnostic(
     assert res["data"] == {"result": False, "diag_id": diag_id}
 
 
-@pytest.mark.parametrize("device,turris_os_version", [("mox", "4.0")], indirect=True)
+@pytest.mark.parametrize("device,cmdline_file,turris_os_version", [("mox", "mox", "4.0")], indirect=True)
 def test_diagnostics_complex(
-    infrastructure, start_buses, clear_diagnostics, device, turris_os_version
+    infrastructure, start_buses, clear_diagnostics, device, cmdline_file, turris_os_version
 ):
     length = len(
         infrastructure.process_message(
@@ -116,7 +117,7 @@ def test_diagnostics_complex(
         )["data"]["diagnostics"]
     )
     # add a diagnostic
-    modules = ["15_processes"]
+    modules = ["processes"]
     res = infrastructure.process_message(
         {
             "module": "diagnostics",
