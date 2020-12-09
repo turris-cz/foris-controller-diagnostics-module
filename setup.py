@@ -50,7 +50,10 @@ setup(
     install_requires=[
         "foris-controller @ git+https://gitlab.nic.cz/turris/foris-controller/foris-controller.git#egg=foris-controller"
     ],
-    setup_requires=["pytest-runner"],
+    setup_requires=[
+        "pytest-runner",
+        "flake8",
+    ],
     tests_require=["pytest", "foris-controller-testtools", "foris-client", "ubus", "paho-mqtt"],
     dependency_links=[
         "git+https://gitlab.nic.cz/turris/foris-controller/foris-controller-testtools.git#egg=foris-controller-testtools",
