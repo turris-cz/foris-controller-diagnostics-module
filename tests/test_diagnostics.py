@@ -24,9 +24,6 @@ import subprocess
 from foris_controller_testtools.fixtures import (
     backend,
     infrastructure,
-    ubusd_test,
-    start_buses,
-    mosquitto_test,
     uci_configs_init,
     lighttpd_restart_command,
     turris_os_version,
@@ -46,7 +43,7 @@ def clear_diagnostics():
 
 @pytest.mark.parametrize("device,cmdline_file,turris_os_version", [("mox", "mox", "4.0")], indirect=True)
 def test_diagnostics_list_modules(
-    infrastructure, start_buses, clear_diagnostics, device, cmdline_file, turris_os_version
+    infrastructure, clear_diagnostics, device, cmdline_file, turris_os_version
 ):
     res = infrastructure.process_message(
         {"module": "diagnostics", "action": "list_modules", "kind": "request"}
@@ -56,7 +53,7 @@ def test_diagnostics_list_modules(
 
 @pytest.mark.parametrize("device,turris_os_version", [("mox", "4.0")], indirect=True)
 def test_diagnostics_list_diagnostics(
-    infrastructure, start_buses, clear_diagnostics, device, turris_os_version
+    infrastructure, clear_diagnostics, device, turris_os_version
 ):
     res = infrastructure.process_message(
         {"module": "diagnostics", "action": "list_diagnostics", "kind": "request"}
@@ -66,7 +63,7 @@ def test_diagnostics_list_diagnostics(
 
 @pytest.mark.parametrize("device,turris_os_version", [("mox", "4.0")], indirect=True)
 def test_diagnostics_prepare_diagnostic(
-    infrastructure, start_buses, clear_diagnostics, device, turris_os_version
+    infrastructure, clear_diagnostics, device, turris_os_version
 ):
     modules = ["15_processes"]
     res = infrastructure.process_message(
@@ -82,7 +79,7 @@ def test_diagnostics_prepare_diagnostic(
 
 @pytest.mark.parametrize("device,turris_os_version", [("mox", "4.0")], indirect=True)
 def test_diagnostics_remove_diagnostic(
-    infrastructure, start_buses, clear_diagnostics, device, turris_os_version
+    infrastructure, clear_diagnostics, device, turris_os_version
 ):
     diag_id = "non-existing"
     res = infrastructure.process_message(
@@ -109,7 +106,7 @@ def test_diagnostics_remove_diagnostic(
 
 @pytest.mark.parametrize("device,cmdline_file,turris_os_version", [("mox", "mox", "4.0")], indirect=True)
 def test_diagnostics_complex(
-    infrastructure, start_buses, clear_diagnostics, device, cmdline_file, turris_os_version
+    infrastructure, clear_diagnostics, device, cmdline_file, turris_os_version
 ):
     length = len(
         infrastructure.process_message(
@@ -161,7 +158,6 @@ def test_diagnostics_complex(
 @pytest.mark.parametrize("device,turris_os_version", [("mox", "4.0")], indirect=True)
 def test_sentry(
     infrastructure,
-    start_buses,
     uci_configs_init,
     lighttpd_restart_command,
     device,
