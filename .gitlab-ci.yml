@@ -1,4 +1,4 @@
-image: registry.labs.nic.cz/turris/foris-ci/python3
+image: registry.nic.cz/turris/foris-ci/python3
 
 stages:
   - test
