@@ -21,16 +21,6 @@ import time
 import pytest
 import subprocess
 
-from foris_controller_testtools.fixtures import (
-    backend,
-    infrastructure,
-    uci_configs_init,
-    lighttpd_restart_command,
-    turris_os_version,
-    device,
-    cmdline_file,
-)
-
 from foris_controller_testtools.utils import lighttpd_restart_was_called
 
 
