@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "foris-controller-diagnostics-module"
+dynamic = ["version"]
+description = "Diagnostics module for foris-controller (wrapper around diagnostics cmd)"
+readme = "README.rst"
+license = "GPL-3.0-only"
+authors = [
+    { name = "CZ.NIC, z.s.p.o. (https://www.nic.cz/)", email = "packaging@turris.cz" },
+]
+dependencies = [
+    "foris-controller",
+]
+
+[project.optional-dependencies]
+mqtt = [
+    "paho-mqtt",
+]
+tests = [
+    "pytest",
+    "ubus",
+    "paho-mqtt",
+    "foris-client",
+    "foris-controller-testtools",
+]
+ubus = [
+    "ubus",
+]
+
+[project.urls]
+Homepage = "https://gitlab.nic.cz/turris/foris-controller/foris-controller-diagnostics-module"
+
+[tool.hatch.version]
+path = "foris_controller_diagnostics_module/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/foris_controller_modules",
+    "/foris_controller_backends",
+    "/foris_controller_diagnostics_module",
+]
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/foris_controller_modules",
+    "/foris_controller_backends",
+    "/foris_controller_diagnostics_module",
+]
