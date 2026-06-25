@@ -33,6 +33,9 @@ ubus = [
 [project.urls]
 Homepage = "https://gitlab.nic.cz/turris/foris-controller/foris-controller-diagnostics-module"
 
+[project.entry-points.foris_controller_modules]
+diagnostics = "foris_controller_modules.diagnostics"
+
 [tool.hatch.version]
 path = "foris_controller_diagnostics_module/__init__.py"
 
